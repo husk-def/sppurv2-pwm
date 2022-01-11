@@ -1,1 +1,0 @@
-cmd_/home/aleksandar/Documents/sppurv2/projekat/driver_pwm/gpio_driver_pwm.ko := ld -r -m elf_x86_64 --build-id=sha1  -T scripts/module.lds -o /home/aleksandar/Documents/sppurv2/projekat/driver_pwm/gpio_driver_pwm.ko /home/aleksandar/Documents/sppurv2/projekat/driver_pwm/gpio_driver_pwm.o /home/aleksandar/Documents/sppurv2/projekat/driver_pwm/gpio_driver_pwm.mod.o;  true

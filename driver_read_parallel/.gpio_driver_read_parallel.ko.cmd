@@ -1,1 +1,0 @@
-cmd_/home/pi/sppurv2/projekat/driver_read_parallel/gpio_driver_read_parallel.ko := ld -EL -r  -T ./scripts/module-common.lds --build-id  -o /home/pi/sppurv2/projekat/driver_read_parallel/gpio_driver_read_parallel.ko /home/pi/sppurv2/projekat/driver_read_parallel/gpio_driver_read_parallel.o /home/pi/sppurv2/projekat/driver_read_parallel/gpio_driver_read_parallel.mod.o ;  true
