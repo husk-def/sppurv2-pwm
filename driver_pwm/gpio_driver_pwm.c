@@ -686,10 +686,10 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
     unsigned short n_args = 0;
     printk(KERN_INFO "gpio_driver_pwm: unsigned short size = %hu", size);
  
-    printk(KERN_INFO "gpio_driver_pwm: write ->");
+    printk(KERN_INFO "gpio_driver_pwm: write -> bufaddr: %p, len: %zu", buf, len);
  
     /* Reset memory. */
-    memset(gpio_driver_buffer, 0, BUF_LEN);
+    memset(gpio_driver_buffer, '\0', BUF_LEN);
     printk(KERN_INFO "gpio_driver_pwm: memset successful");
 
     /* Get data from user space.*/
