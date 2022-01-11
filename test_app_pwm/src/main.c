@@ -113,7 +113,7 @@ void *terminal_producer(void *parm)
             ++semaphore;
             pthread_mutex_unlock(&ringAccess);
         }
-        usleep(100000);
+        //usleep(100000);
     }
 }
 
