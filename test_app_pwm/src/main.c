@@ -141,16 +141,17 @@ void *consumer(void *parm)
             tea = ringBufGetStr(&ring);
             --semaphore;
             pthread_mutex_unlock(&ringAccess);
-
+            usleep(250000);
             file_desc_out = open("/dev/gpio_driver_pwm", O_RDWR);
             if (file_desc_out < 0) {
                 printf("Error, file_in not opened gpio_driver_pwm\n");
                 pthread_exit(NULL);
             }
-
+            usleep(250000);
             write(file_desc_out, tea.instr, BUF_LEN);
-            sleep(1);
+            usleep(250000);
             close(file_desc_out);
+            usleep(250000);
             //printf("\n\ninstr: %s \n\n", tea.instr);
         }
     }
