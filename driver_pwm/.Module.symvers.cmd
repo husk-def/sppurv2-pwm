@@ -1,0 +1,1 @@
+cmd_/home/aleksandar/Documents/sppurv2/projekat/driver_pwm/Module.symvers := sed 's/\.ko$$/\.o/' /home/aleksandar/Documents/sppurv2/projekat/driver_pwm/modules.order | scripts/mod/modpost    -o /home/aleksandar/Documents/sppurv2/projekat/driver_pwm/Module.symvers -e -i Module.symvers   -T -

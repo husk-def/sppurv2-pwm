@@ -1,0 +1,4 @@
+mknod /dev/gpio_driver_read_parallel c 242 0
+c for character device
+242 is major number
+0 for ???
