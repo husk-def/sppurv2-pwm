@@ -680,12 +680,11 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
 {
     /* Temp variables */
     char *instruction;
-    printk(KERN_INFO "gpio_driver_pwm: char* instruciton at %p", instruction);
     unsigned short args[16];
     unsigned short size = sizeof (args) / sizeof(args[0]);
-    printk(KERN_INFO "gpio_driver_pwm: unsigned short size = %hu", size);
     /* number of arguments fetched */
     unsigned short n_args = 0;
+    printk(KERN_INFO "gpio_driver_pwm: unsigned short size = %hu", size);
  
     printk(KERN_INFO "gpio_driver_pwm: write ->");
  
