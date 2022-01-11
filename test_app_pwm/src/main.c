@@ -134,7 +134,7 @@ void *consumer(void *parm)
                     printf("\n*****stop.*****consumer\n\n");
                     pthread_exit(NULL);
                 }
-                sleep(1);
+                usleep(100000);
             }
 //            usleep(100000);
             pthread_mutex_lock(&ringAccess);
@@ -148,10 +148,10 @@ void *consumer(void *parm)
                 pthread_exit(NULL);
             }
 
-            //write(file_desc_out, tea.instr, BUF_LEN);
+            write(file_desc_out, tea.instr, BUF_LEN);
             sleep(1);
             close(file_desc_out);
-            printf("\n\ninstr: %s \n\n", tea.instr);
+            //printf("\n\ninstr: %s \n\n", tea.instr);
         }
     }
 }
