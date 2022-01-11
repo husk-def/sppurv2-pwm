@@ -104,9 +104,9 @@ void *terminal_producer(void *parm)
             fgets(tmp_in, 79, stdin);
             tmp_in[strcspn(tmp_in, "\n,./<>?;'\\:|[]{}`~!@#$%^&*()-=_+")] = 0;
             //token = strtok(tmp_in, ";'\\[]{}:/?.>,<~!@#$%^&*()_+-=");
-            if (token == NULL) {
-                break;
-            }
+            // if (token == NULL) {
+            //     break;
+            // }
 	        sprintf(tea.instr, "%s", tmp_in);
             pthread_mutex_lock(&ringAccess);
             ringBufPutStr(&ring, tea);
