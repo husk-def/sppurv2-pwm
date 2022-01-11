@@ -702,6 +702,7 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
     if (copy_from_user(gpio_driver_buffer, buf, len) != 0) {
         return -EFAULT;
     } else {
+        printk(KERN_INFO "gpio_driver_pwm: copy_from_user success");
          /* Instruction formats
           * spd x
           *  x - relative speed [int 0..15]
