@@ -149,7 +149,7 @@ void *consumer(void *parm)
             }
 
             //write(file_desc_out, tea.instr, BUF_LEN);
-            usleep(100000);
+            sleep(1);
             close(file_desc_out);
             printf("\n\ninstr: %s \n\n", tea.instr);
         }
