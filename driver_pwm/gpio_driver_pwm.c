@@ -729,6 +729,7 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
              } else {
                  /* instruction not implemented */
                  printk(KERN_ALERT "gpio_driver_pwm: %s instruction not implemented", instruction);
+                 return -EFAULT;
              }
          }
 
