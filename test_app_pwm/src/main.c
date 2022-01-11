@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -77,7 +78,8 @@ void *driver_producer(void *parm)
         }
 
         /* Fill the struct */
-        sprintf(tea.instr, "spd %hu\0", speed);
+        sprintf(tmp_in, "spd %hu", speed);
+	    sprintf(tea.instr, "%s", tmp_in);
 
         pthread_mutex_lock(&ringAccess);
         ringBufPutStr(&ring, tea);
@@ -90,20 +92,27 @@ void *terminal_producer(void *parm)
 {
     struct Instruction tea;
     char tmp_in[BUF_LEN] = {0};
-    
+    char *token;
+
     while (1) {
         if (stop == 1) {
         /* stop bit set, end the program */
             printf("\n*****stop.*****terminal_producer\n\n");
             pthread_exit(NULL);
         } else {
-            fgets(tea.instr, BUF_LEN - 1, stdin);
+           // scanf("%79c", tmp_in);
+            fgets(tmp_in, 79, stdin);
+            token = strtok(tmp_in, ";'\\[]{}:/?.>,<~!@#$%^&*()_+-=");
+            if (token == NULL) {
+                break;
+            }
+	        sprintf(tea.instr, "%s", tmp_in);
             pthread_mutex_lock(&ringAccess);
             ringBufPutStr(&ring, tea);
             ++semaphore;
             pthread_mutex_unlock(&ringAccess);
         }
-        sleep(1);
+        usleep(100000);
     }
 }
 
@@ -111,7 +120,7 @@ void *consumer(void *parm)
 {
     struct Instruction tea;
     int file_desc_out;
-    
+
     while (1) {
         if (stop == 1) {
         /* stop bit set, end the program */
@@ -126,22 +135,22 @@ void *consumer(void *parm)
                 }
                 sleep(1);
             }
-
+//            usleep(100000);
             pthread_mutex_lock(&ringAccess);
             tea = ringBufGetStr(&ring);
             --semaphore;
             pthread_mutex_unlock(&ringAccess);
 
-            file_desc_out = open("/home/pi/sppurv2/projekat/file", O_RDWR);
+            file_desc_out = open("/dev/gpio_driver_pwm", O_RDWR);
             if (file_desc_out < 0) {
                 printf("Error, file_in not opened gpio_driver_pwm\n");
                 pthread_exit(NULL);
             }
 
             write(file_desc_out, tea.instr, BUF_LEN);
-            
+            usleep(100000);
             close(file_desc_out);
-            printf("\n\n %s \n\n", tea.instr);
+            //printf("\n\ninstr: %s \n\n", tea.instr);
         }
     }
 }
@@ -154,7 +163,7 @@ int main()
     pthread_t hConsumer;
 
     /* Init mutex */
-    pthread_mutex_init(&ringAccess, NULL);  
+    pthread_mutex_init(&ringAccess, NULL);
 
     /* thread init */
     pthread_create(&hProducer_term, NULL, terminal_producer, 0);
@@ -163,8 +172,8 @@ int main()
 
     /* thread join */
     pthread_join(hProducer_driver, NULL);
+    pthread_join(hConsumer, NULL);
     pthread_cancel(hProducer_term);
-    pthread_cancel(hConsumer);
 
     /* free */
     pthread_mutex_destroy(&ringAccess);

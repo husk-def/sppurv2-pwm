@@ -693,44 +693,44 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
     if (copy_from_user(gpio_driver_buffer, buf, len) != 0) {
         return -EFAULT;
     } else {
-        // /* Instruction formats
-        //  * spd x
-        //  *  x - relative speed [int 0..15]
-        //  * crv a0 .. a15
-        //  *  a0 .. a15 - curve points [int 0..100]
-        //  */
-        // instruction = strsep(&gpio_driver_buffer, " ");
-        // if (instruction == NULL) {
-        //     /* gpio_driver_buffer empty */
-        //     return -EFAULT;
-        // } else {
-        //     if (strncmp(instruction, "spd", 5) == 0) {
-        //         /* possible instruction read */
-        //         /* speed matched, check for argument */
-        //         n_args = fetch_args(gpio_driver_buffer, args, size);
-        //         if (n_args < 1) {
-        //             printk(KERN_ALERT "gpio_driver_pwm: insufficient number of args in %s", instruction);
-        //         } else {
-        //             /* ignore all except the first element */
-        //             printk(KERN_INFO "gpio_driver_pwm: pwm set to %hu", (args[0] > 15) ? 15 : args[0]);
-        //         }
-        //     } else if (strncmp(instruction, "crv", 5) == 0) {
-        //         /* possible instruction curve */
-        //         /* curve matched, check for arguments */
-        //         n_args = fetch_args(gpio_driver_buffer, args, size);
-        //         if (n_args < 0) {
-        //             printk(KERN_ALERT "gpio_driver_pwm: error %s", instruction);
-        //         } else {
-        //             curve_resolve(args, n_args, size);
-        //             printk(KERN_INFO "gpio_driver_pwm: curve set to %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu",
-        //             args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], 
-        //             args[8], args[9], args[10], args[11], args[12], args[13], args[14], args[15]);
-        //         }
-        //     } else {
-        //         /* instruction not implemented */
-        //         printk(KERN_ALERT "gpio_driver_pwm: %s instruction not implemented", instruction);
-        //     }
-        // }
+         /* Instruction formats
+          * spd x
+          *  x - relative speed [int 0..15]
+          * crv a0 .. a15
+          *  a0 .. a15 - curve points [int 0..100]
+          */
+         instruction = strsep(&gpio_driver_buffer, " ");
+         if (instruction == NULL) {
+             /* gpio_driver_buffer empty */
+             return -EFAULT;
+         } else {
+             if (strncmp(instruction, "spd", 5) == 0) {
+                 /* possible instruction read */
+                 /* speed matched, check for argument */
+                 n_args = fetch_args(gpio_driver_buffer, args, size);
+                 if (n_args < 1) {
+                     printk(KERN_ALERT "gpio_driver_pwm: insufficient number of args in %s", instruction);
+                 } else {
+                     /* ignore all except the first element */
+                     printk(KERN_INFO "gpio_driver_pwm: pwm set to %hu", (args[0] > 15) ? 15 : args[0]);
+                 }
+             } else if (strncmp(instruction, "crv", 5) == 0) {
+                 /* possible instruction curve */
+                 /* curve matched, check for arguments */
+                 n_args = fetch_args(gpio_driver_buffer, args, size);
+                 if (n_args < 0) {
+                     printk(KERN_ALERT "gpio_driver_pwm: error %s", instruction);
+                 } else {
+                     curve_resolve(args, n_args, size);
+                     printk(KERN_INFO "gpio_driver_pwm: curve set to %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu",
+                     args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], 
+                     args[8], args[9], args[10], args[11], args[12], args[13], args[14], args[15]);
+                 }
+             } else {
+                 /* instruction not implemented */
+                 printk(KERN_ALERT "gpio_driver_pwm: %s instruction not implemented", instruction);
+             }
+         }
 
         return len;
     }
