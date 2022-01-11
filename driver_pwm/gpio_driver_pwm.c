@@ -1,3 +1,4 @@
+#include <asm-generic/errno-base.h>
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -679,8 +680,10 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
 {
     /* Temp variables */
     char *instruction;
+    printk(KERN_INFO "gpio_driver_pwm: char* instruciton at %p", instruction);
     unsigned short args[16];
     unsigned short size = sizeof (args) / sizeof(args[0]);
+    printk(KERN_INFO "gpio_driver_pwm: unsigned short size = %hu", size);
     /* number of arguments fetched */
     unsigned short n_args = 0;
  
@@ -688,8 +691,14 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
  
     /* Reset memory. */
     memset(gpio_driver_buffer, 0, BUF_LEN);
+    printk(KERN_INFO "gpio_driver_pwm: memset successful");
 
     /* Get data from user space.*/
+    if (buf == NULL || len < 1) {
+        /* oops */
+        printk(KERN_ALERT "gpio_driver_pwm: oops, skip");
+        return -EFAULT;
+    }
     if (copy_from_user(gpio_driver_buffer, buf, len) != 0) {
         return -EFAULT;
     } else {
@@ -702,6 +711,7 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
          instruction = strsep(&gpio_driver_buffer, " ");
          if (instruction == NULL) {
              /* gpio_driver_buffer empty */
+             printk(KERN_ALERT "gpio_driver_pwm: buffer empty");
              return -EFAULT;
          } else {
              if (strncmp(instruction, "spd", 5) == 0) {
@@ -710,6 +720,7 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
                  n_args = fetch_args(gpio_driver_buffer, args, size);
                  if (n_args < 1) {
                      printk(KERN_ALERT "gpio_driver_pwm: insufficient number of args in %s", instruction);
+                     return -EFAULT;
                  } else {
                      /* ignore all except the first element */
                      printk(KERN_INFO "gpio_driver_pwm: pwm set to %hu", (args[0] > 15) ? 15 : args[0]);
@@ -720,6 +731,7 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
                  n_args = fetch_args(gpio_driver_buffer, args, size);
                  if (n_args < 0) {
                      printk(KERN_ALERT "gpio_driver_pwm: error %s", instruction);
+                     return -EFAULT;
                  } else {
                      curve_resolve(args, n_args, size);
                      printk(KERN_INFO "gpio_driver_pwm: curve set to %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu",
