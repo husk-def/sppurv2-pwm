@@ -102,8 +102,8 @@ void *terminal_producer(void *parm)
         } else {
            // scanf("%79c", tmp_in);
             fgets(tmp_in, 79, stdin);
-            tmp_in[strcspn(tmp_in, "\n")] = 0;
-            token = strtok(tmp_in, ";'\\[]{}:/?.>,<~!@#$%^&*()_+-=");
+            tmp_in[strcspn(tmp_in, "\n,./<>?;'\\:|[]{}`~!@#$%^&*()-=_+")] = 0;
+            //token = strtok(tmp_in, ";'\\[]{}:/?.>,<~!@#$%^&*()_+-=");
             if (token == NULL) {
                 break;
             }
