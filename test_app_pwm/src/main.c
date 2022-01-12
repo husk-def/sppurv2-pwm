@@ -120,7 +120,7 @@ void *terminal_producer(void *parm)
 void *consumer(void *parm)
 {
     struct Instruction tea;
-    int file_desc_out;
+    FILE *file_desc_out;
 
     while (1) {
         if (stop == 1) {
@@ -142,15 +142,16 @@ void *consumer(void *parm)
             --semaphore;
             pthread_mutex_unlock(&ringAccess);
             usleep(250000);
-            file_desc_out = open("/dev/gpio_driver_pwm", O_RDWR);
+            file_desc_out = fopen("/dev/gpio_driver_pwm", "w");
             if (file_desc_out < 0) {
                 printf("Error, file_in not opened gpio_driver_pwm\n");
                 pthread_exit(NULL);
             }
             usleep(250000);
-            write(file_desc_out, tea.instr, BUF_LEN);
+            //write(file_desc_out, tea.instr, BUF_LEN);
+            fwrite(tea.instr, sizeof(tea.instr[0]), BUF_LEN, file_desc_out);
             usleep(250000);
-            close(file_desc_out);
+            fclose(file_desc_out);
             usleep(250000);
             //printf("\n\ninstr: %s \n\n", tea.instr);
         }
