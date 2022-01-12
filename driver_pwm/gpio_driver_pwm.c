@@ -690,7 +690,8 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
  
     /* Reset memory. */
     memset(gpio_driver_buffer, '\0', BUF_LEN);
-    printk(KERN_INFO "gpio_driver_pwm: memset successful");
+    printk(KERN_INFO "gpio_driver_pwm: memset successful buffer: %p", gpio_driver_buffer);
+
 
     /* Get data from user space.*/
     if (buf == NULL || len < 1) {
