@@ -29,6 +29,14 @@ static pthread_mutex_t ringAccess;
 static unsigned short stop = 0;
 static unsigned short semaphore = 0;
 
+// void span(char* str, char ignore[])
+// {
+//     int i;
+//     for (i = 0; i < 79; ++i) {
+//         if ()
+//     }
+// }
+
 struct Instruction ringBufGetStr (struct RingBuffer *apBuffer)
 {
     int index;
@@ -52,6 +60,7 @@ void *driver_producer(void *parm)
     unsigned short speed;
     char *pend;
     struct Instruction tea;
+    char ignore[] = {'\n', ' ', ',', '<', '.', '>', '/', '?', ';', ':', '"', '\'', '|', '\\', '[', '{', ']', '}', '`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '-', '='};
 
     while (1) {
         file_desc_in = open("/dev/gpio_driver_read_parallel", O_RDWR);
@@ -93,6 +102,7 @@ void *terminal_producer(void *parm)
     struct Instruction tea;
     char tmp_in[BUF_LEN] = {0};
     char *token;
+    unsigned long place;
 
     while (1) {
         if (stop == 1) {
@@ -102,7 +112,11 @@ void *terminal_producer(void *parm)
         } else {
            // scanf("%79c", tmp_in);
             fgets(tmp_in, 79, stdin);
-            tmp_in[strcspn(tmp_in, "\n,./<>?;'\\:|[]{}`~!@#$%^&*()-=_+")] = 0;
+            place = strcspn(tmp_in, "\n,./<>?;'\\:|[]{}`~!@#$%^&*()-=_+");
+            if (place > 0) {
+                tmp_in[place] = ' ';
+                tmp_in[place + 1] = 0;
+            }
             //token = strtok(tmp_in, ";'\\[]{}:/?.>,<~!@#$%^&*()_+-=");
             // if (token == NULL) {
             //     break;
