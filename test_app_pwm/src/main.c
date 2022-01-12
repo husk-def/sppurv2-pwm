@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#define BUF_LEN (80)
+#define BUF_LEN (81)
 #define RING_SIZE (6)
 #define INSTR_LEN (4)
 #define N_ARGS (16)
@@ -60,7 +60,7 @@ void *driver_producer(void *parm)
     unsigned short speed;
     char *pend;
     struct Instruction tea;
-    char ignore[] = {'\n', ' ', ',', '<', '.', '>', '/', '?', ';', ':', '"', '\'', '|', '\\', '[', '{', ']', '}', '`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '-', '='};
+    //char ignore[] = {'\n', ' ', ',', '<', '.', '>', '/', '?', ';', ':', '"', '\'', '|', '\\', '[', '{', ']', '}', '`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '-', '='};
 
     while (1) {
         file_desc_in = open("/dev/gpio_driver_read_parallel", O_RDWR);
@@ -110,13 +110,13 @@ void *terminal_producer(void *parm)
             printf("\n*****stop.*****terminal_producer\n\n");
             pthread_exit(NULL);
         } else {
-           // scanf("%79c", tmp_in);
             fgets(tmp_in, 79, stdin);
+            /* figuring out corner cases */
             tmp_in[strcspn(tmp_in, "\n")] = ' ';
-            //token = strtok(tmp_in, ";'\\[]{}:/?.>,<~!@#$%^&*()_+-=");
-            // if (token == NULL) {
-            //     break;
-            // }
+            place = strcspn(tmp_in, "\0");
+            tmp_in[place] = ' ';
+            tmp_in[place + 1] = '\0';
+            /* */
 	        sprintf(tea.instr, "%s", tmp_in);
             pthread_mutex_lock(&ringAccess);
             ringBufPutStr(&ring, tea);
