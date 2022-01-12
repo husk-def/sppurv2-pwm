@@ -112,10 +112,12 @@ void *terminal_producer(void *parm)
         } else {
            // scanf("%79c", tmp_in);
             fgets(tmp_in, 79, stdin);
-            place = strcspn(tmp_in, "\n,./<>?;'\\:|[]{}`~!@#$%^&*()-=_+");
+            place = strcspn(tmp_in, ",./<>?;'\\:|[]{}`~!@#$%^&*()-=_+");
             if (place > 0) {
                 tmp_in[place] = ' ';
                 tmp_in[place + 1] = 0;
+            } else {
+                tmp_in[strcspn(tmp_in, "\n")] = ' ';
             }
             //token = strtok(tmp_in, ";'\\[]{}:/?.>,<~!@#$%^&*()_+-=");
             // if (token == NULL) {
