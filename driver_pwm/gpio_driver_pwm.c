@@ -174,12 +174,12 @@ module_exit(gpio_driver_exit);
 
 /* curve arguments array */
 static unsigned short args[16];
-static unsigned short curve[16] = {0};
+static unsigned short curve[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 //static unsigned short timer_curve[16];
 static unsigned short c = 90;
 
 /* pwm percent */
-static unsigned short pwm_percent;
+static unsigned short pwm_percent = 0;
 
 /* Major number. */
 int gpio_driver_major;
@@ -473,7 +473,7 @@ int gpio_driver_init(void)
     /* Initialize GPIO pins. */
     /* PWM */
     SetGpioPinDirection(GPIO_14, GPIO_DIRECTION_OUT);
-    SetGpioPin(GPIO_14);
+    //SetGpioPin(GPIO_14);
     
     /* Initialize high resolution timer. */
     hrtimer_init(&timer_nanosecond, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
@@ -769,7 +769,7 @@ static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
         cnti = 0;
         if (cntj > 9999) {
             /* 1 second has passed, refresh curve and pwm_percent */
-            c = curve[pwm_percent];
+            //c = curve[pwm_percent];
             cntj = 0;
             //printk(KERN_INFO "gpio_driver_pwm: 1 second has passed, c = %hu", c);
             printk(KERN_INFO "gpio_driver_pwm: pwm set to %hu percent", c);
