@@ -472,7 +472,7 @@ int gpio_driver_init(void)
 
     /* Initialize GPIO pins. */
     /* PWM */
-    SetGpioPinDirection(GPIO_14, GPIO_DIRECTION_OUT);
+    SetGpioPinDirection(GPIO_23, GPIO_DIRECTION_OUT);
     //ClearGpioPin(GPIO_14);
     //SetGpioPin(GPIO_14);
     
@@ -509,10 +509,10 @@ void gpio_driver_exit(void)
     printk(KERN_INFO "gpio_driver_pwm: Removing gpio_driver_pwm module");
     
     /* Clear GPIO pins. */
-    ClearGpioPin(GPIO_14);
+    ClearGpioPin(GPIO_23);
 
     /* Set GPIO pins as inputs and disable pull-ups. */
-    SetGpioPinDirection(GPIO_14, GPIO_DIRECTION_IN);
+    SetGpioPinDirection(GPIO_23, GPIO_DIRECTION_IN);
 
     /* Closing hrtimer */
     hrtimer_cancel(&timer_nanosecond);
@@ -782,10 +782,10 @@ static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
     }
     
     if (cnti == 0 && cnti != c) {
-        SetGpioPin(GPIO_14);
+        SetGpioPin(GPIO_23);
         //printk(KERN_INFO "gpio_driver_buffer: setpin");
     } else if (cnti == c) {
-        ClearGpioPin(GPIO_14);
+        ClearGpioPin(GPIO_23);
         //printk(KERN_INFO "gpio_driver_buffer: clrpin");
     }
 
