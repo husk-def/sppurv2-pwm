@@ -154,7 +154,6 @@ static ssize_t gpio_driver_read(struct file *, char *buf, size_t , loff_t *);
 static ssize_t gpio_driver_write(struct file *, const char *buf, size_t , loff_t *);
 
 /* Added functions */
-static void setPinValue(u8 value, char pin);
 static unsigned short fetch_args(char *gdb, unsigned short *args, unsigned short size);
 static unsigned short curve_resolve(unsigned short *args, unsigned short n_a, unsigned short size);
 static void copy_contents(unsigned short *args, unsigned short size_a, const unsigned short *argss, unsigned short size_aa);
@@ -178,7 +177,7 @@ module_exit(gpio_driver_exit);
 /* curve arguments array */
 static unsigned short args[16];
 static unsigned short curve[16] = {0};
-static unsigned short timer_curve[16];
+//static unsigned short timer_curve[16];
 
 /* pwm percent */
 static unsigned short pwm_percent;
@@ -388,26 +387,6 @@ void ClearGpioPin(char pin)
     /* Clear gpio. */
     tmp = 0x1 << pin;
     iowrite32(tmp, virt_gpio_base + GPCLRreg_offset);
-}
-
-/*
- * setPinValue function
- *  Parameters:
- *   pin       - number of GPIO pin;
- *   value     - value (0 or 1) for pin to be set;
- *  
- *  Operation:
- *   Sets the pin low or high.
- */
-static void setPinValue(u8 value, char pin)
-{
-    if (value == 1) {
-        SetGpioPin(pin); 
-    } else if (value == 0) {
-        ClearGpioPin(pin);
-    } else {
-        /* error, skip */
-    }
 }
 
 /*
