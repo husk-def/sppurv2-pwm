@@ -178,6 +178,7 @@ module_exit(gpio_driver_exit);
 static unsigned short args[16];
 static unsigned short curve[16] = {0};
 //static unsigned short timer_curve[16];
+static unsigned short c = 90;
 
 /* pwm percent */
 static unsigned short pwm_percent;
@@ -607,13 +608,13 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
     unsigned short size = sizeof (args) / sizeof(args[0]);
     /* number of arguments fetched */
     unsigned short n_args = 0;
-    printk(KERN_INFO "gpio_driver_pwm: unsigned short size = %hu", size);
+    //printk(KERN_INFO "gpio_driver_pwm: unsigned short size = %hu", size);
  
-    printk(KERN_INFO "gpio_driver_pwm: write -> bufaddr: %p, len: %zu", buf, len);
+    //printk(KERN_INFO "gpio_driver_pwm: write -> bufaddr: %p, len: %zu", buf, len);
  
     /* Reset memory. */
     memset(gpio_driver_buffer, '\0', BUF_LEN);
-    printk(KERN_INFO "gpio_driver_pwm: memset successful buffer: %p", gpio_driver_buffer);
+    //printk(KERN_INFO "gpio_driver_pwm: memset successful buffer: %p", gpio_driver_buffer);
 
 
     /* Get data from user space.*/
@@ -625,7 +626,7 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
     if (copy_from_user(gpio_driver_buffer, buf, len) != 0) {
         return -EFAULT;
     } else {
-        printk(KERN_INFO "gpio_driver_pwm: copy_from_user success");
+        //printk(KERN_INFO "gpio_driver_pwm: copy_from_user success");
          /* Instruction formats
           * spd x
           *  x - relative speed [int 0..15]
@@ -649,7 +650,7 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
                      /* ignore all except the first element */
                      /* floor it to 15 */
                      pwm_percent = (args[0] > 15) ? 15 : args[0];
-                     printk(KERN_INFO "gpio_driver_pwm: pwm set to %hu", pwm_percent);
+                     //printk(KERN_INFO "gpio_driver_pwm: pwm set to %hu", pwm_percent);
                  }
              } else if (strncmp(instruction, "crv", 5) == 0) {
                  /* possible instruction curve */
@@ -660,9 +661,9 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
                      return -EFAULT;
                  } else {
                      curve_resolve(args, n_args, size);
-                     printk(KERN_INFO "gpio_driver_pwm: curve set to %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu",
-                     args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], 
-                     args[8], args[9], args[10], args[11], args[12], args[13], args[14], args[15]);
+                    //  printk(KERN_INFO "gpio_driver_pwm: curve set to %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu",
+                    //  args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], 
+                    //  args[8], args[9], args[10], args[11], args[12], args[13], args[14], args[15]);
                      /* copy contents of args to curve */
                      copy_contents(curve, 16, args, 16);
                  }
@@ -763,7 +764,7 @@ static void copy_contents(unsigned short *args, unsigned short size_a, const uns
 
 static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
 {
-    unsigned short c = 90;
+    
     //cnti = (cnti < 100)? ++cnti : 0;
     if (cnti > 99) {
         cnti = 0;
@@ -772,6 +773,7 @@ static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
             c = curve[pwm_percent];
             cntj = 0;
             //printk(KERN_INFO "gpio_driver_pwm: 1 second has passed, c = %hu", c);
+            printk(KERN_INFO "gpio_driver_pwm: pwm set to %hu percent", c);
         } else {
             ++cntj;
         }
