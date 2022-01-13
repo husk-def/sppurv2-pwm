@@ -176,12 +176,12 @@ module_exit(gpio_driver_exit);
 /* Global variables of the driver */
 
 /* curve arguments array */
-unsigned short args[16];
-unsigned short curve[16];
-unsigned short timer_curve[16];
+static unsigned short args[16];
+static unsigned short curve[16];
+static unsigned short timer_curve[16];
 
 /* pwm percent */
-unsigned short pwm_percent;
+static unsigned short pwm_percent;
 
 /* Major number. */
 int gpio_driver_major;
@@ -784,7 +784,7 @@ static void copy_contents(unsigned short *args, unsigned short size_a, const uns
 
 static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
 {
-    unsigned short c;
+    unsigned short c = 0;
 
     if (cnti == 15) {
         cnti = 0;
