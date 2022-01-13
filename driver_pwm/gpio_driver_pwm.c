@@ -1,4 +1,5 @@
 #include <asm-generic/errno-base.h>
+#include <asm-generic/posix_types.h>
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -781,11 +782,15 @@ static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
         ++cnti;
     }
     
-    if (cnti < c) {
+    if (cnti == 0) {
         SetGpioPin(GPIO_14);
+    } else if (cnti < c) {
+        //SetGpioPin(GPIO_14);
         printk(KERN_INFO "gpio_driver_buffer: setpin");
-    } else {
+    } else if (cnti == c) {
         ClearGpioPin(GPIO_14);
+        printk(KERN_INFO "gpio_driver_buffer: clrpin");
+    } else {
         printk(KERN_INFO "gpio_driver_buffer: clrpin");
     }
 
