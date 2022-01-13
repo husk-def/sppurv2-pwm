@@ -473,7 +473,7 @@ int gpio_driver_init(void)
     /* Initialize GPIO pins. */
     /* PWM */
     SetGpioPinDirection(GPIO_14, GPIO_DIRECTION_OUT);
-    ClearGpioPin(GPIO_14);
+    //ClearGpioPin(GPIO_14);
     //SetGpioPin(GPIO_14);
     
     /* Initialize high resolution timer. */
