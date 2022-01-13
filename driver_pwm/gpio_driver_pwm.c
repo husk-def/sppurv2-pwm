@@ -174,7 +174,7 @@ module_exit(gpio_driver_exit);
 
 /* curve arguments array */
 static unsigned short args[16];
-static unsigned short curve[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+static unsigned short curve[16] = {100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 //static unsigned short timer_curve[16];
 static unsigned short c = 90;
 
