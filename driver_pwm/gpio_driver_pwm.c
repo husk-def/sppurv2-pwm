@@ -780,7 +780,7 @@ static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
         ++cnti;
     }
     
-    if (cnti == 0) {
+    if (cnti == 0 && cnti != c) {
         SetGpioPin(GPIO_14);
         //printk(KERN_INFO "gpio_driver_buffer: setpin");
     } else if (cnti == c) {
