@@ -534,6 +534,9 @@ void gpio_driver_exit(void)
     /* Set GPIO pins as inputs and disable pull-ups. */
     SetGpioPinDirection(GPIO_14, GPIO_DIRECTION_IN);
 
+    /* Closing hrtimer */
+    hrtimer_cancel(&timer_nanosecond);
+
     /* Unmap GPIO Physical address space. */
     if (virt_gpio_base != NULL) {
         iounmap(virt_gpio_base);
@@ -548,9 +551,6 @@ void gpio_driver_exit(void)
     if (instr_buffer != NULL) {
         kfree(instr_buffer);
     }
-
-    /* Closing hrtimer */
-    hrtimer_cancel(&timer_nanosecond);
 
     /* Freeing the major number. */
     unregister_chrdev(gpio_driver_major, "gpio_driver_pwm");
@@ -784,11 +784,11 @@ static void copy_contents(unsigned short *args, unsigned short size_a, const uns
 
 static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
 {
-    unsigned short c = 0;
-
-    if (cnti == 15) {
+    unsigned short c = 90;
+    //cnti = (cnti < 100)? ++cnti : 0;
+    if (cnti < 100) {
         cnti = 0;
-        if (cntj == 62500) {
+        if (cntj < 10000) {
             /* 1 second has passed, refresh curve and pwm_percent */
             c = curve[pwm_percent];
             cntj = 0;
@@ -799,7 +799,7 @@ static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
         ++cnti;
     }
     
-    setPinValue((cnti < c), GPIO_14);
+    setPinValue((cnti < c)? 1 : 0, GPIO_14);
 
     hrtimer_forward(&timer_nanosecond, ktime_get(), ktn);
 
