@@ -639,7 +639,7 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
              printk(KERN_ALERT "gpio_driver_pwm: buffer empty");
              return -EFAULT;
          } else {
-             if (strncmp(instruction, "spd", 5) == 0) {
+             if (strncmp(instruction, "spd\0", 4) == 0) {
                  /* possible instruction read */
                  /* speed matched, check for argument */
                  n_args = fetch_args(gpio_driver_buffer, args, size);
@@ -652,7 +652,7 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
                      pwm_percent = (args[0] > 15) ? 15 : args[0];
                      //printk(KERN_INFO "gpio_driver_pwm: pwm set to %hu", pwm_percent);
                  }
-             } else if (strncmp(instruction, "crv", 5) == 0) {
+             } else if (strncmp(instruction, "crv\0", 4) == 0) {
                  /* possible instruction curve */
                  /* curve matched, check for arguments */
                  n_args = fetch_args(gpio_driver_buffer, args, size);
