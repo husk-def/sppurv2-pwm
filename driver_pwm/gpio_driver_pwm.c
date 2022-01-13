@@ -765,11 +765,11 @@ static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
 {
     
     //cnti = (cnti < 100)? ++cnti : 0;
-    if (cnti > 99 * 1000) {
+    if (cnti > 99) {
         cnti = 0;
-        if (cntj > 9999 * 1000) {
+        if (cntj > 9999) {
             /* 1 second has passed, refresh curve and pwm_percent */
-            //c = curve[pwm_percent];
+            c = curve[pwm_percent];
             cntj = 0;
             //printk(KERN_INFO "gpio_driver_pwm: 1 second has passed, c = %hu", c);
             printk(KERN_INFO "gpio_driver_pwm: pwm set to %hu percent", c);
@@ -782,10 +782,10 @@ static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
     
     if (cnti == 0) {
         SetGpioPin(GPIO_14);
-        printk(KERN_INFO "gpio_driver_buffer: setpin");
-    } else if (cnti == c * 1000) {
+        //printk(KERN_INFO "gpio_driver_buffer: setpin");
+    } else if (cnti == c) {
         ClearGpioPin(GPIO_14);
-        printk(KERN_INFO "gpio_driver_buffer: clrpin");
+        //printk(KERN_INFO "gpio_driver_buffer: clrpin");
     }
 
     //setPinValue((cnti < c)? 1 : 0, GPIO_14);
