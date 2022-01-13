@@ -177,7 +177,7 @@ module_exit(gpio_driver_exit);
 
 /* curve arguments array */
 static unsigned short args[16];
-static unsigned short curve[16];
+static unsigned short curve[16] = {0};
 static unsigned short timer_curve[16];
 
 /* pwm percent */
@@ -800,7 +800,13 @@ static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
         ++cnti;
     }
     
-    setPinValue((cnti < c)? 1 : 0, GPIO_14);
+    if (cnti < c) {
+        SetGpioPin(GPIO_14);
+    } else {
+        ClearGpioPin(GPIO_14);
+    }
+
+    //setPinValue((cnti < c)? 1 : 0, GPIO_14);
 
     hrtimer_forward(&timer_nanosecond, ktime_get(), ktn);
 
