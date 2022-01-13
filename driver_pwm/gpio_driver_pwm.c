@@ -174,7 +174,7 @@ module_exit(gpio_driver_exit);
 
 /* curve arguments array */
 static unsigned short args[16];
-static unsigned short curve[16] = {100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+static unsigned short curve[16] = {6, 12, 18, 25, 31, 37, 43, 50, 56, 62, 68, 75, 81, 87, 93, 100};
 //static unsigned short timer_curve[16];
 static unsigned short c = 90;
 
@@ -773,7 +773,7 @@ static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
             c = curve[pwm_percent];
             cntj = 0;
             //printk(KERN_INFO "gpio_driver_pwm: 1 second has passed, c = %hu", c);
-            printk(KERN_INFO "gpio_driver_pwm: pwm set to %hu percent", c);
+            //printk(KERN_INFO "gpio_driver_pwm: pwm set to %hu percent", c);
         } else {
             ++cntj;
         }
