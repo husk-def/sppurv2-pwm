@@ -196,7 +196,7 @@ char* instr_buffer;
 static struct hrtimer timer_nanosecond;
 static ktime_t ktn;
 static const s64 secondsn = 0;
-static const unsigned long nanosecondsn = 1000;
+static const unsigned long nanosecondsn = 1;
 static int cnti = 0;
 static int cntj = 0;
 
