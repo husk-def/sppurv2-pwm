@@ -18,8 +18,7 @@
 #include <linux/gpio.h>
 #include <asm/io.h>
 #include <asm/uaccess.h>
-/* added */
-#include <linux/mutex.h>
+
 
 MODULE_LICENSE("Dual BSD/GPL");
 
