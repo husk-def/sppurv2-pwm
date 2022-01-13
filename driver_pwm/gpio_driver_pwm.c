@@ -473,6 +473,7 @@ int gpio_driver_init(void)
     /* Initialize GPIO pins. */
     /* PWM */
     SetGpioPinDirection(GPIO_14, GPIO_DIRECTION_OUT);
+    SetGpioPin(GPIO_14);
     
     /* Initialize high resolution timer. */
     hrtimer_init(&timer_nanosecond, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
@@ -779,13 +780,13 @@ static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
         ++cnti;
     }
     
-    if (cnti == 0) {
-        SetGpioPin(GPIO_14);
-        printk(KERN_INFO "gpio_driver_buffer: setpin");
-    } else if (cnti == c * 1000) {
-        ClearGpioPin(GPIO_14);
-        printk(KERN_INFO "gpio_driver_buffer: clrpin");
-    }
+    // if (cnti == 0) {
+    //     SetGpioPin(GPIO_14);
+    //     printk(KERN_INFO "gpio_driver_buffer: setpin");
+    // } else if (cnti == c * 1000) {
+    //     ClearGpioPin(GPIO_14);
+    //     printk(KERN_INFO "gpio_driver_buffer: clrpin");
+    // }
 
     //setPinValue((cnti < c)? 1 : 0, GPIO_14);
 
