@@ -1,5 +1,3 @@
-#include <asm-generic/errno-base.h>
-#include <asm-generic/posix_types.h>
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
