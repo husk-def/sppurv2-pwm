@@ -17,6 +17,8 @@
 #include <linux/gpio.h>
 #include <asm/io.h>
 #include <asm/uaccess.h>
+/* added */
+#include <linux/mutex.h>
 
 MODULE_LICENSE("Dual BSD/GPL");
 
@@ -155,6 +157,8 @@ static ssize_t gpio_driver_write(struct file *, const char *buf, size_t , loff_t
 static void setPinValue(u8 value, char pin);
 static unsigned short fetch_args(char *gdb, unsigned short *args, unsigned short size);
 static unsigned short curve_resolve(unsigned short *args, unsigned short n_a, unsigned short size);
+static void copy_contents(unsigned short *args, unsigned short size_a, const unsigned short *argss, unsigned short size_aa);
+static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param);
 
 /* Structure that declares the usual file access functions. */
 struct file_operations gpio_driver_fops =
@@ -171,6 +175,14 @@ module_exit(gpio_driver_exit);
 
 /* Global variables of the driver */
 
+/* curve arguments array */
+unsigned short args[16];
+unsigned short curve[16];
+unsigned short timer_curve[16];
+
+/* pwm percent */
+unsigned short pwm_percent;
+
 /* Major number. */
 int gpio_driver_major;
 
@@ -182,13 +194,13 @@ char* gpio_driver_buffer;
 #define INSTR_LEN 6
 char* instr_buffer;
 
-/* Base 4 timer vars */
-static struct hrtimer timer_base_4;
-static ktime_t kt;
-static u8 time = 0;
-static const s64 seconds = 1;
-static const unsigned long microseconds = 0;
-static u8 cs = GO; 
+/* 1 nanosecond timer vars */
+static struct hrtimer timer_nanosecond;
+static ktime_t ktn;
+static const s64 secondsn = 0;
+static const unsigned long nanosecondsn = 1000;
+static int cnti = 0;
+static int cntj = 0;
 
 /* Virtual address where the physical GPIO address is mapped */
 void* virt_gpio_base;
@@ -390,10 +402,11 @@ void ClearGpioPin(char pin)
 static void setPinValue(u8 value, char pin)
 {
     if (value == 1) {
-        SetGpioPin(pin);
-        
+        SetGpioPin(pin); 
     } else if (value == 0) {
         ClearGpioPin(pin);
+    } else {
+        /* error, skip */
     }
 }
 
@@ -480,68 +493,17 @@ int gpio_driver_init(void)
     }
 
     /* Initialize GPIO pins. */
-    /* LEDS */
-    /*SetGpioPinDirection(GPIO_06, GPIO_DIRECTION_OUT);
-    SetGpioPinDirection(GPIO_13, GPIO_DIRECTION_OUT);
-    SetGpioPinDirection(GPIO_19, GPIO_DIRECTION_OUT);
-    SetGpioPinDirection(GPIO_26, GPIO_DIRECTION_OUT);*/
-    /* SWitches */
-    /*SetInternalPullUpDown(GPIO_12, PULL_UP);
-    SetInternalPullUpDown(GPIO_16, PULL_UP);
-    SetInternalPullUpDown(GPIO_20, PULL_UP);
-    SetInternalPullUpDown(GPIO_21, PULL_UP);
-    SetGpioPinDirection(GPIO_12, GPIO_DIRECTION_IN);
-    SetGpioPinDirection(GPIO_16, GPIO_DIRECTION_IN);
-    SetGpioPinDirection(GPIO_20, GPIO_DIRECTION_IN);
-    SetGpioPinDirection(GPIO_21, GPIO_DIRECTION_IN);*/
-
-    /* PushButtons */
-    /*SetInternalPullUpDown(GPIO_03, PULL_UP);
-    SetInternalPullUpDown(GPIO_22, PULL_UP);
-    SetGpioPinDirection(GPIO_03, GPIO_DIRECTION_IN);
-    SetGpioPinDirection(GPIO_22, GPIO_DIRECTION_IN);*/
+    /* PWM */
+    SetGpioPinDirection(GPIO_14, GPIO_DIRECTION_OUT);
     
     /* Initialize high resolution timer. */
-    /*hrtimer_init(&timer_base_4, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
-    kt = ktime_set(seconds, microseconds);
-    timer_base_4.function = &gpio_counter_base_4;
-    hrtimer_start(&timer_base_4, kt, HRTIMER_MODE_REL);*/
-
-    /* Initialize gpio 3 ISR. */
-    /*result = gpio_request_one(GPIO_03, GPIOF_IN, "irq_gpio3");
-	if (result != 0) {
-        printk("Error: GPIO request failed!\n");
-        goto fail_irq;
-    }
-    irq_gpio3 = gpio_to_irq(GPIO_03);
-	result = request_irq(irq_gpio3, h_irq_gpio3,
-      IRQF_TRIGGER_FALLING, "irq_gpio3", (void *)(h_irq_gpio3));
-	if (result != 0) {
-        printk("Error: ISR not registered!\n");
-        goto fail_irq;
-    }*/
-    
-    /* Initialize gpio 22 iSR */
-    /*result = gpio_request_one(GPIO_22, GPIOF_IN, "irq_gpio22");
-	if (result != 0) {
-        printk("Error: GPIO request failed!\n");
-        goto fail_irq;
-    }
-    irq_gpio22 = gpio_to_irq(GPIO_22);
-	result = request_irq(irq_gpio22, h_irq_gpio22,
-      IRQF_TRIGGER_FALLING, "irq_gpio22", (void *)(h_irq_gpio22));
-	if (result != 0) {
-        printk("Error: ISR not registered!\n");
-        goto fail_irq;
-    }*/
+    hrtimer_init(&timer_nanosecond, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+    ktn = ktime_set(secondsn, nanosecondsn);
+    timer_nanosecond.function = &gpio_counter_nanosecond;
+    hrtimer_start(&timer_nanosecond, ktn, HRTIMER_MODE_REL);
 
     return 0;
 
-fail_irq:
-    /* Unmap GPIO Physical address space. */
-    if (virt_gpio_base) {
-        iounmap(virt_gpio_base);
-    }
 fail_no_virt_mem:
     /* Freeing buffer gpio_driver_buffer. */
     if (gpio_driver_buffer) {
@@ -565,33 +527,12 @@ fail_no_mem:
 void gpio_driver_exit(void)
 {
     printk(KERN_INFO "gpio_driver_pwm: Removing gpio_driver_pwm module");
-
-    /* Release IRQ and handler. */
-    /*disable_irq(irq_gpio3);
-    free_irq(irq_gpio3, h_irq_gpio3);
-    gpio_free(GPIO_03);*/
-    /* */
-    /*disable_irq(irq_gpio22);
-    free_irq(irq_gpio22, h_irq_gpio22);
-    gpio_free(GPIO_22);*/
     
     /* Clear GPIO pins. */
-    /*ClearGpioPin(GPIO_06);
-    ClearGpioPin(GPIO_13);
-    ClearGpioPin(GPIO_19);
-    ClearGpioPin(GPIO_26);*/
+    ClearGpioPin(GPIO_14);
 
     /* Set GPIO pins as inputs and disable pull-ups. */
-    /*SetGpioPinDirection(GPIO_06, GPIO_DIRECTION_IN);
-    SetGpioPinDirection(GPIO_13, GPIO_DIRECTION_IN);
-    SetGpioPinDirection(GPIO_19, GPIO_DIRECTION_IN);
-    SetGpioPinDirection(GPIO_26, GPIO_DIRECTION_IN);
-    SetInternalPullUpDown(GPIO_12, PULL_NONE);
-    SetInternalPullUpDown(GPIO_16, PULL_NONE);
-    SetInternalPullUpDown(GPIO_20, PULL_NONE);
-    SetInternalPullUpDown(GPIO_21, PULL_NONE);
-    SetInternalPullUpDown(GPIO_03, PULL_NONE);
-    SetInternalPullUpDown(GPIO_22, PULL_NONE);*/
+    SetGpioPinDirection(GPIO_14, GPIO_DIRECTION_IN);
 
     /* Unmap GPIO Physical address space. */
     if (virt_gpio_base != NULL) {
@@ -604,9 +545,12 @@ void gpio_driver_exit(void)
     }
 
     /* Freeing buffer instr_buffer. */
-    if (gpio_driver_buffer != NULL) {
+    if (instr_buffer != NULL) {
         kfree(instr_buffer);
     }
+
+    /* Closing hrtimer */
+    hrtimer_cancel(&timer_nanosecond);
 
     /* Freeing the major number. */
     unregister_chrdev(gpio_driver_major, "gpio_driver_pwm");
@@ -680,7 +624,7 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
 {
     /* Temp variables */
     char *instruction;
-    unsigned short args[16];
+    //unsigned short args[16];
     unsigned short size = sizeof (args) / sizeof(args[0]);
     /* number of arguments fetched */
     unsigned short n_args = 0;
@@ -724,7 +668,9 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
                      return -EFAULT;
                  } else {
                      /* ignore all except the first element */
-                     printk(KERN_INFO "gpio_driver_pwm: pwm set to %hu", (args[0] > 15) ? 15 : args[0]);
+                     /* floor it to 15 */
+                     pwm_percent = (args[0] > 15) ? 15 : args[0];
+                     printk(KERN_INFO "gpio_driver_pwm: pwm set to %hu", pwm_percent);
                  }
              } else if (strncmp(instruction, "crv", 5) == 0) {
                  /* possible instruction curve */
@@ -738,6 +684,8 @@ static ssize_t gpio_driver_write(struct file *filp, const char *buf, size_t len,
                      printk(KERN_INFO "gpio_driver_pwm: curve set to %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu %hu",
                      args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], 
                      args[8], args[9], args[10], args[11], args[12], args[13], args[14], args[15]);
+                     /* copy contents of args to curve */
+                     copy_contents(curve, 16, args, 16);
                  }
              } else {
                  /* instruction not implemented */
@@ -819,4 +767,41 @@ static unsigned short curve_resolve(unsigned short *args, unsigned short n_a, un
         }
     }
     return i;
+}
+
+/* 
+ * copy contents function
+ * copies contents from argss array of size size_aa to args of size size_a
+ */
+static void copy_contents(unsigned short *args, unsigned short size_a, const unsigned short *argss, unsigned short size_aa)
+{
+    unsigned short i = 0;
+    while (i < size_a && i < size_aa) {
+        args[i] = argss[i];     
+        ++i;
+    }
+}
+
+static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
+{
+    unsigned short c;
+
+    if (cnti == 15) {
+        cnti = 0;
+        if (cntj == 62500) {
+            /* 1 second has passed, refresh curve and pwm_percent */
+            c = curve[pwm_percent];
+            cntj = 0;
+        } else {
+            ++cntj;
+        }
+    } else {
+        ++cnti;
+    }
+    
+    setPinValue((cnti < c), GPIO_14);
+
+    hrtimer_forward(&timer_nanosecond, ktime_get(), ktn);
+
+    return HRTIMER_RESTART;
 }
