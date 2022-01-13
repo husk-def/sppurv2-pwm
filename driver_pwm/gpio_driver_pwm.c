@@ -792,10 +792,10 @@ static enum hrtimer_restart gpio_counter_nanosecond(struct hrtimer *param)
             /* 1 second has passed, refresh curve and pwm_percent */
             c = curve[pwm_percent];
             cntj = 0;
+            printk(KERN_INFO "gpio_driver_pwm: 1 second has passed, c = %hu", %c);
         } else {
             ++cntj;
         }
-        printk(KERN_INFO "gpio_driver_pwm: 1 second has passed");
     } else {
         ++cnti;
     }
